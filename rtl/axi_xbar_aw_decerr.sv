@@ -1,9 +1,8 @@
 module axi_xbar_aw_decerr #(
 	parameter int ID_WIDTH = 4,
-	parameter int DATA_WIDTH = 64,
 	parameter int NUM_MASTERS = 2,
 	parameter int MASTER_WIDTH = (NUM_MASTERS > 1) ? $clog2(NUM_MASTERS) : 1,
-	parameter int EXT_ID_WIDTH = ID_WIDTH + MASTER_WIDTH)
+	parameter int EXT_ID_WIDTH = ID_WIDTH + MASTER_WIDTH
 )(
 	input logic aclk,
 	input logic arst_n,
@@ -27,18 +26,20 @@ module axi_xbar_aw_decerr #(
 
 	logic [EXT_ID_WIDTH-1:0] captured_awid;
 
-	always_ff $(posedge aclk or negedge arst_n) begin
-		if(!arst_n) 
+	always_ff @(posedge aclk or negedge arst_n) begin
+		if(!arst_n) begin
 			state <= IDLE;
+			captured_awid <= '0;
+		end
 		else begin
 			case(state)
 				IDLE: if(awvalid && awready) begin
-						  captured_id <= awid;
+						  captured_awid <= awid;
 						  state <= SINK;
 					  end
 
 				SINK: if(wvalid && wready && wlast)
-						  state <= REST;
+						  state <= RESP;
 
 				RESP: if(bvalid && bready)
 						  state <= IDLE;
@@ -51,7 +52,7 @@ module axi_xbar_aw_decerr #(
 	assign awready = (state == IDLE);
 	assign wready = (state == SINK);
 	assign bvalid = (state == RESP);
-	assign bid = captured_id;
+	assign bid = captured_awid;
 	assign bresp = 2'b11;
 
 endmodule

@@ -23,20 +23,21 @@ module axi_xbar_ar_decerr #(
 	typedef enum logic {IDLE, RESP} decerr_states;
 	decerr_states state;
 
-	logic [EXT_ID_WIDTH-1:0] captured_rid;
+	logic [EXT_ID_WIDTH-1:0] captured_arid;
 	logic [7:0] captured_len;
 
 	always_ff @(posedge aclk or negedge arst_n) begin
 		if(!arst_n) begin
 			state <= IDLE;
 			captured_len <= '0;
+			captured_arid <= '0;
 		end
 
 		else begin
 			case(state)
 				IDLE: if(arvalid && arready) begin
 						  state <= RESP;
-						  captured_rid <= rid;
+						  captured_arid <= arid;
 						  captured_len <= arlen;
 					  end
 
@@ -47,7 +48,7 @@ module axi_xbar_ar_decerr #(
 						  	  captured_len <= captured_len - 1;
 					  end
 
-				default: state <= IDLE:
+				default: state <= IDLE;
 			endcase
 		end
 	end
@@ -55,8 +56,8 @@ module axi_xbar_ar_decerr #(
 	assign arready = (state == IDLE);
 	assign rvalid = (state == RESP);
 	assign rdata = '0;
-	assign rid = captured_id;
-	assign rresp = 2'11;
+	assign rid = captured_arid;
+	assign rresp = 2'b11;
 	assign rlast = (state == RESP) && (captured_len == 0);
 
 endmodule

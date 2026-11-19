@@ -82,7 +82,7 @@ class axi_xbar_coverage;
 		}
 
 		cp_wstrb: coverpoint m_wstrb {
-			bins full_strobe = {8'hFF};
+			bins strobe_regions[12] = {['0 : '1]};
 		}
 
 		cp_bresp: coverpoint m_bresp {

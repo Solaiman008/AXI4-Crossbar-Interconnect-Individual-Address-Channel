@@ -37,7 +37,7 @@ class axi_xbar_burst_transfer_test extends axi_xbar_base_test;
 				for(int b = 0; b <= burst_len; b++) begin
 					rand_data = {$urandom, $urandom};
 					wdata_q.push_back(rand_data);
-					wstrb_q.push_back('1);
+					wstrb_q.push_back($urandom_range(255, 1));
 					rdata_q.push_back(rand_data);
 					rresp_q.push_back(2'b00);
 				end

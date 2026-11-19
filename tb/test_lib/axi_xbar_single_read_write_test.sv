@@ -24,7 +24,7 @@ class axi_xbar_single_read_write_test extends axi_xbar_base_test;
 
         env.run();
         env.agt_m0.gen.reset();
-        env.agt_m1.gen.reset();
+        //env.agt_m1.gen.reset();
 
         for(int i = 0; i < NUM_TARGETS; i++) begin
             repeat(REPEAT_COUNT) begin

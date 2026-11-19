@@ -23,9 +23,9 @@ class axi_xbar_reset_test extends axi_xbar_base_test;
 		@(posedge vif_m0.aclk);
 
 		if(vif_s0.awvalid !== 1'b0 || vif_s0.wvalid !== 1'b0 || vif_s0.arvalid !== 1'b0 ||
-		   vif_s1.awvalid !== 1'b0 || vif_s1.wvalid !== 1'b0 || vif_s1.arvalid !== 1'b0 ||
-		   vif_m0.bvalid !== 1'b0 || vif_m0.rvalid !== 1'b0 ||
-		   vif_m1.bvalid !== 1'b0 || vif_m1.rvalid !== 1'b0) begin
+			vif_s1.awvalid !== 1'b0 || vif_s1.wvalid !== 1'b0 || vif_s1.arvalid !== 1'b0 ||
+			vif_m0.bvalid !== 1'b0 || vif_m0.rvalid !== 1'b0 ||
+			vif_m1.bvalid !== 1'b0 || vif_m1.rvalid !== 1'b0) begin
 			$error("[RESET_TEST][%s] FAIL: Crossbar VALID output remained high/unknown during reset at time %0d", phase_name, $time);
 		end
 		else begin

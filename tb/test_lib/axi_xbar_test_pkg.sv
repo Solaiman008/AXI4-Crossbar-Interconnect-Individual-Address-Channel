@@ -15,4 +15,6 @@ package axi_xbar_test_pkg;
 	`include "axi_xbar_edge_addr_test.sv"
 	`include "axi_xbar_data_pattern_test.sv"
 	`include "axi_xbar_id_tracking_test.sv"
+	`include "axi_xbar_full_duplex_test.sv"
+	`include "axi_xbar_ooo_resp_test.sv"
 endpackage

@@ -11,8 +11,8 @@ class axi_xbar_scoreboard;
 	mailbox rd_mon_to_sb_s0;
 	mailbox rd_mon_to_sb_s1;
 
-	axi_xbar_write_transaction wr_s_q[2][$];
-	axi_xbar_read_transaction rd_s_q[2][$];
+	axi_xbar_write_transaction #(EXT_ID_WIDTH) wr_s_q[2][$];
+	axi_xbar_read_transaction #(EXT_ID_WIDTH) rd_s_q[2][$];
 
 	int m_aw_passed;
 	int m_aw_failed;
@@ -70,7 +70,7 @@ class axi_xbar_scoreboard;
 	endtask
 
 	task collect_wr_s(int s_id, mailbox mbx);
-		axi_xbar_write_transaction tr;
+		axi_xbar_write_transaction #(EXT_ID_WIDTH) tr;
 		forever begin
 			mbx.get(tr);
 			wr_s_q[s_id].push_back(tr);
@@ -78,7 +78,7 @@ class axi_xbar_scoreboard;
 	endtask
 
 	task collect_rd_s(int s_id, mailbox mbx);
-		axi_xbar_read_transaction tr;
+		axi_xbar_read_transaction #(EXT_ID_WIDTH) tr;
 		forever begin
 			mbx.get(tr);
 			rd_s_q[s_id].push_back(tr);
@@ -96,7 +96,7 @@ class axi_xbar_scoreboard;
 
 	task check_wr_m(int m_id, mailbox mbx);
 		axi_xbar_write_transaction m_tr;
-		axi_xbar_write_transaction s_tr;
+		axi_xbar_write_transaction #(EXT_ID_WIDTH) s_tr;
 		int target_s;
 		int match_idx;
 		bit aw_ok;
@@ -112,11 +112,11 @@ class axi_xbar_scoreboard;
 				m_w_passed++;
 				if(m_tr.bresp == 2'b11 && m_tr.bid == m_tr.awid) begin
 					s_b_passed++;
-					$display("[SB][PASS] M%0d->Default_Slave s_b_passed at addr %0h", m_id, m_tr.awaddr);
+					$display("[SB][PASS] M%0d->Decerr_generator s_b_passed at addr %0h", m_id, m_tr.awaddr);
 				end
 				else begin
 					s_b_failed++;
-					$display("[SB][FAIL] M%0d->Default_Slave s_b_failed at addr %0h", m_id, m_tr.awaddr);
+					$display("[SB][FAIL] M%0d->Decerr_generator s_b_failed at addr %0h", m_id, m_tr.awaddr);
 				end
 			end
 			else begin
@@ -124,8 +124,7 @@ class axi_xbar_scoreboard;
 				forever begin
 					wait(wr_s_q[target_s].size() > 0);
 					for(int i = 0; i < wr_s_q[target_s].size(); i++) begin
-						// Match robustly on address and transaction parameters instead of strict extended ID bits
-						if(wr_s_q[target_s][i].awaddr == m_tr.awaddr && wr_s_q[target_s][i].awlen == m_tr.awlen) begin
+						if(wr_s_q[target_s][i].awaddr == m_tr.awaddr && wr_s_q[target_s][i].awlen == m_tr.awlen && wr_s_q[target_s][i].awid == {MASTER_WIDTH'(m_id), m_tr.awid}) begin
 							match_idx = i;
 							break;
 						end
@@ -165,7 +164,7 @@ class axi_xbar_scoreboard;
 					$display("[SB][FAIL] M%0d->S%0d m_w_failed at addr %0h", m_id, target_s, m_tr.awaddr);
 				end
 
-				b_ok = (m_tr.bresp == s_tr.bresp);
+				b_ok = (m_tr.bresp == s_tr.bresp) && (m_tr.bid == m_tr.awid);
 
 				if(b_ok) begin
 					s_b_passed++;
@@ -177,12 +176,11 @@ class axi_xbar_scoreboard;
 				end
 			end
 		end
-		$display("AW passed = %0d", m_aw_passed);
 	endtask
 
 	task check_rd_m(int m_id, mailbox mbx);
 		axi_xbar_read_transaction m_tr;
-		axi_xbar_read_transaction s_tr;
+		axi_xbar_read_transaction #(EXT_ID_WIDTH) s_tr;
 		int target_s;
 		int match_idx;
 		bit ar_ok;
@@ -202,11 +200,11 @@ class axi_xbar_scoreboard;
 				end
 				if(decerr_ok) begin
 					s_r_passed++;
-					$display("[SB][PASS] Default_Slave->M%0d s_r_passed at addr %0h", m_id, m_tr.araddr);
+					$display("[SB][PASS] Decerr_generator->M%0d s_r_passed at addr %0h", m_id, m_tr.araddr);
 				end
 				else begin
 					s_r_failed++;
-					$display("[SB][FAIL] Default_Slave->M%0d s_r_failed at addr %0h", m_id, m_tr.araddr);
+					$display("[SB][FAIL] Decerr_generator->M%0d s_r_failed at addr %0h", m_id, m_tr.araddr);
 				end
 			end
 			else begin
@@ -214,8 +212,7 @@ class axi_xbar_scoreboard;
 				forever begin
 					wait(rd_s_q[target_s].size() > 0);
 					for(int i = 0; i < rd_s_q[target_s].size(); i++) begin
-						// Match robustly on address and transaction parameters
-						if(rd_s_q[target_s][i].araddr == m_tr.araddr && rd_s_q[target_s][i].arlen == m_tr.arlen) begin
+						if(rd_s_q[target_s][i].araddr == m_tr.araddr && rd_s_q[target_s][i].arlen == m_tr.arlen && rd_s_q[target_s][i].arid == {MASTER_WIDTH'(m_id), m_tr.arid}) begin
 							match_idx = i;
 							break;
 						end

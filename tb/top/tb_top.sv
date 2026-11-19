@@ -180,10 +180,20 @@ axi_xbar_top #(
                                           	  test.run();
                                           end
 			"axi_xbar_id_tracking_test": begin
-											  axi_xbar_id_tracking_test test;
-											  test = new(m0_if, m1_if, s0_if, s1_if);
-                                          	  test.run();
+											 axi_xbar_id_tracking_test test;
+											 test = new(m0_if, m1_if, s0_if, s1_if);
+                                          	 test.run();
                                           end
+			"axi_xbar_full_duplex_test": begin
+									   	     axi_xbar_full_duplex_test test;
+											 test = new(m0_if, m1_if, s0_if, s1_if);
+                                          	 test.run();
+                                         end
+			"axi_xbar_ooo_resp_test": begin
+										  axi_xbar_ooo_resp_test test;
+										  test = new(m0_if, m1_if, s0_if, s1_if);
+                                          test.run();
+                                      end
 
 			default:
 				$display("UNKNOWN TEST NAME");
@@ -195,8 +205,8 @@ axi_xbar_top #(
 	initial begin
 		$dumpfile("dump.vcd");
 		$dumpvars(0, tb_top);
-		#1000000000;
-		$fatal("Simulation time exceeded");
+		#1000000;
+		$fatal(1, "Simulation time exceeded");
 	end
 
 	task if_init();

@@ -32,9 +32,10 @@ class axi_xbar_master_monitor;
 	endtask
 
 	task write();
-		//$display("Monitor started monitoring");
+		$display("Monitor started monitoring");
 		forever begin
 			@(posedge vif.aclk);
+			//$display("awvalid = %b, awready = %b", vif.awvalid, vif.awready);
 			if(vif.arst_n && vif.awvalid && vif.awready) begin
 				wr_tr = new();
 				wr_tr.awid = vif.awid;
@@ -49,6 +50,7 @@ class axi_xbar_master_monitor;
 							@(posedge vif.aclk);
 						while(!(vif.wvalid && vif.wready));
 					end
+					//$display("after wvalid and wready");
 					wr_tr.wdata.push_back(vif.wdata);
 					wr_tr.wstrb.push_back(vif.wstrb);
 					wr_tr.wlast.push_back(vif.wlast);
@@ -98,6 +100,7 @@ class axi_xbar_master_monitor;
 							break;
 					end
 				end
+				//$display("after rvalid and rready");
 				//$display("Master read monitored");
 				cov.sample_master_read(master_id, rd_tr);
 				rd_mon_to_sb.put(rd_tr);
