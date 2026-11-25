@@ -87,7 +87,10 @@ class axi_xbar_master_driver;
 				vif.wlast <= 0;
 			end
 			begin
+			vif.bready <= 0;
+			repeat(get_delay())
 				@(posedge vif.aclk);
+
 				vif.bready <= tr.bready;
 				do
 					@(posedge vif.aclk);
@@ -117,7 +120,9 @@ class axi_xbar_master_driver;
 				vif.arvalid <= 0;
 			end
 			begin
-				@(posedge vif.aclk);
+				vif.rready <= 0;
+				repeat(get_delay())
+					@(posedge vif.aclk);
 				vif.rready <= tr.rready;
 
 				//for(int i = 0; i <= tr.arlen; i++) begin
@@ -130,4 +135,12 @@ class axi_xbar_master_driver;
 			end
 		join
 	endtask
+
+	function int get_delay();
+		int r = $urandom_range(0, 99);
+		if (r < 70) return 0;   
+		else if (r < 80) return 80;  
+		else if (r < 90) return 90;  
+		else return 100; 
+	endfunction
 endclass

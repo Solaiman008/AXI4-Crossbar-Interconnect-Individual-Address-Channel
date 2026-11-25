@@ -40,6 +40,9 @@ class axi_xbar_slave_driver;
 		fork
 			//$display("Driver Write Transaction Drived");
 			begin
+				vif.awready <= 0;
+				repeat(get_delay())
+					@(posedge vif.aclk);
 				@(posedge vif.aclk);
 				vif.awready <= tr.awready;
 				do
@@ -50,6 +53,9 @@ class axi_xbar_slave_driver;
 				vif.awready <= 0;
 			end
 			begin
+				vif.wready <= 0;
+				repeat(get_delay())
+					@(posedge vif.aclk);
 				@(posedge vif.aclk);
 				vif.wready <= tr.wready;
 				do
@@ -80,6 +86,10 @@ class axi_xbar_slave_driver;
 		wait(vif.arst_n === 1'b1);
 
 		//$display("Driver Read Transaction Drived");
+		vif.arready <= 0;
+		repeat(get_delay())
+			@(posedge vif.aclk);
+
 		@(posedge vif.aclk);
 		vif.arready <= tr.arready;
 
@@ -106,4 +116,13 @@ class axi_xbar_slave_driver;
 		vif.rvalid <= 0;
 		vif.rlast <= 0;
 	endtask
+
+	function int get_delay();
+		int r = $urandom_range(0, 99);
+		if (r < 70) return 0;
+		else if (r < 80) return 80;
+		else if (r < 90) return 90;
+		else return 100;
+	endfunction
+
 endclass

@@ -149,5 +149,74 @@ interface axi_xbar_if #(ID_W = ID_WIDTH) (input aclk);
 	endproperty
 	a_rresp_legal: assert property (p_rresp_legal)
 		else $error("[SVA][%m] Illegal EXOKAY RRESP detected at time %0d", $time);
+	
+
+	int unsigned cov_rst_valids_low = 0;
+	int unsigned cov_no_x_handshakes = 0;
+	int unsigned cov_aw_no_x = 0;
+	int unsigned cov_aw_stable = 0;
+	int unsigned cov_aw_burst_size_legal = 0;
+	int unsigned cov_w_no_x = 0;
+	int unsigned cov_w_stable = 0;
+	int unsigned cov_b_no_x = 0;
+	int unsigned cov_b_stable = 0;
+	int unsigned cov_bresp_legal = 0;
+	int unsigned cov_ar_no_x = 0;
+	int unsigned cov_ar_stable = 0;
+	int unsigned cov_ar_burst_size_legal = 0;
+	int unsigned cov_r_no_x = 0;
+	int unsigned cov_r_stable = 0;
+	int unsigned cov_rresp_legal = 0;
+
+	always @(posedge aclk) begin
+		if (!arst_n) begin
+			cov_rst_valids_low++;
+		end else begin
+			cov_no_x_handshakes++;
+			if (awvalid) begin
+				cov_aw_no_x++;
+				cov_aw_burst_size_legal++;
+				if (!awready) cov_aw_stable++;
+			end
+			if (wvalid) begin
+				cov_w_no_x++;
+				if (!wready) cov_w_stable++;
+			end
+			if (bvalid) begin
+				cov_b_no_x++;
+				cov_bresp_legal++;
+				if (!bready) cov_b_stable++;
+			end
+			if (arvalid) begin
+				cov_ar_no_x++;
+				cov_ar_burst_size_legal++;
+				if (!arready) cov_ar_stable++;
+			end
+			if (rvalid) begin
+				cov_r_no_x++;
+				cov_rresp_legal++;
+				if (!rready) cov_r_stable++;
+			end
+		end
+	end
+
+	final begin
+		$display("[SVA_COV][%m] rst_valids_low=%0d", cov_rst_valids_low);
+		$display("[SVA_COV][%m] no_x_handshakes=%0d", cov_no_x_handshakes);
+		$display("[SVA_COV][%m] aw_no_x=%0d", cov_aw_no_x);
+		$display("[SVA_COV][%m] aw_stable=%0d", cov_aw_stable);
+		$display("[SVA_COV][%m] aw_burst_size_legal=%0d", cov_aw_burst_size_legal);
+		$display("[SVA_COV][%m] w_no_x=%0d", cov_w_no_x);
+		$display("[SVA_COV][%m] w_stable=%0d", cov_w_stable);
+		$display("[SVA_COV][%m] b_no_x=%0d", cov_b_no_x);
+		$display("[SVA_COV][%m] b_stable=%0d", cov_b_stable);
+		$display("[SVA_COV][%m] bresp_legal=%0d", cov_bresp_legal);
+		$display("[SVA_COV][%m] ar_no_x=%0d", cov_ar_no_x);
+		$display("[SVA_COV][%m] ar_stable=%0d", cov_ar_stable);
+		$display("[SVA_COV][%m] ar_burst_size_legal=%0d", cov_ar_burst_size_legal);
+		$display("[SVA_COV][%m] r_no_x=%0d", cov_r_no_x);
+		$display("[SVA_COV][%m] r_stable=%0d", cov_r_stable);
+		$display("[SVA_COV][%m] rresp_legal=%0d", cov_rresp_legal);
+	end
 
 endinterface

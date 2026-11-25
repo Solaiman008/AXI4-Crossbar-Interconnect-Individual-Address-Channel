@@ -21,7 +21,7 @@ CODE_REPORT_DIR := ./code_coverage_report
 SIMULATOR := $(TOP)_sim
 
 .PHONY: compile elaborate simulate all regression \
-        functional_report code_report coverage_report \
+        functional_report code_report coverage_report assertion_report \
         gui clean
 
 all: simulate
@@ -144,7 +144,23 @@ code_report:
 	        -log code_coverage_$$db.log; \
 	done
 
-coverage_report: functional_report code_report
+
+assertion_report:
+	@echo "========================================"
+	@echo " Merged assertion coverage summary"
+	@echo "========================================"
+	@awk '/\[SVA_COV\]/ { \
+		split($$2, a, "="); \
+		sum[a[1]] += a[2]; \
+	} END { \
+		for (k in sum) printf "%s=%d\n", k, sum[k]; \
+	}' $(LOG_DIR)/*.log | sort
+	@echo "----------------------------------------"
+	@echo " Assertion failures"
+	@echo "----------------------------------------"
+	@grep -h "\[SVA\]" $(LOG_DIR)/*.log || echo "None"
+	
+coverage_report: functional_report code_report assertion_report
 
 wave:
 	gtkwave dump.vcd &
@@ -165,6 +181,6 @@ clean:
 	@rm -rf $(FUNC_REPORT_DIR) $(CODE_REPORT_DIR)
 	@rm -rf xsim.covdb xsim.codeCov
 	@rm -rf logs
-	@rm -f *.jou *.log *.pb *.wdb *.vcd
+	@rm -f *.jou *.log *.pb *.wdb *.vcd *.txt
 	@echo "Clean complete."
 
